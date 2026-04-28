@@ -1,0 +1,121 @@
+import random
+
+class Enemy:
+    def __init__(self, name, health, attack_power):
+        self.name = name
+        self.health = health
+        self.max_health = health
+        self.attack_power = attack_power
+
+    def take_damage(self, amount):
+        self.health -= amount
+        return self.health <= 0
+
+    def attack(self, player):
+        # Small chance for enemy to miss
+        if random.random() < 0.1:
+            print(f"[*] {self.name} missed their attack!")
+            return
+            
+        damage = self.attack_power
+        player.health -= damage
+        print(f"[!] {self.name} attacked you for {damage} damage!")
+
+class CombatSystem:
+    def __init__(self):
+        self.enemy_types = [
+            {"name": "Wild Wolf", "health": 30, "attack": 10},
+            {"name": "Feral Zombie", "health": 50, "attack": 5},
+            {"name": "Giant Spider", "health": 40, "attack": 15}
+        ]
+
+    def spawn_enemy(self):
+        data = random.choice(self.enemy_types)
+        return Enemy(data["name"], data["health"], data["attack"])
+
+    def resolve_combat(self, player, enemy, inventory):
+        """
+        Simple turn-based combat.
+        """
+        print(f"\n--- COMBAT: {player.name} vs {enemy.name} ---")
+        
+        while enemy.health > 0 and player.is_alive:
+            print(f"\n{player.name}: {player.health} HP | {enemy.name}: {enemy.health} HP")
+            print("1. Attack")
+            print("2. Attempt to flee")
+            
+            choice = input("> ")
+            if choice == "1":
+                # Determine damage based on tools
+                damage = 10
+                if inventory.has_item("Basic Axe"):
+                    damage = 20
+                    print("[*] You attack with your Basic Axe!")
+                elif inventory.has_item("Advanced Axe"):
+                    damage = 35
+                    print("[*] You attack with your Advanced Axe!")
+                else:
+                    print("[*] You attack with your bare hands!")
+                
+                if enemy.take_damage(damage):
+                    print(f"[*] You defeated the {enemy.name}!")
+                    break
+                
+                # Enemy AI: Chance to retreat if low health
+                if enemy.health < enemy.max_health * 0.2:
+                    if random.random() < 0.3:
+                        print(f"[*] The {enemy.name} is terrified and flees!")
+                        return "fled"
+                
+                # Enemy attacks back
+                enemy.attack(player)
+                if player.health <= 0:
+                    player.is_alive = False
+                    print(f"[-] You were slain by the {enemy.name}...")
+            
+            elif choice == "2":
+                if random.random() < 0.4:
+                    print("[*] You successfully fled!")
+                    return "fled"
+                else:
+                    print("[!] You failed to flee!")
+                    enemy.attack(player)
+                    if player.health <= 0:
+                        player.is_alive = False
+            else:
+                print("[!] Invalid choice.")
+        
+        return "won" if enemy.health <= 0 else "lost"
+
+    def resolve_combat_gui(self, player, enemy, inventory):
+        """
+        Non-blocking GUI version of combat.
+        In a full GUI, this would be a separate window. For this prototype,
+        we'll simulate the turns and log them to the logger.
+        """
+        from utils.logger import logger
+        logger.log(f"COMBAT: {player.name} vs {enemy.name}!", "combat")
+        
+        # Simulate 3 turns of battle
+        for i in range(3):
+            if enemy.health <= 0 or not player.is_alive: break
+            
+            # Player Attacks
+            damage = 10
+            if inventory.has_item("Basic Axe"): damage = 20
+            elif inventory.has_item("Advanced Axe"): damage = 35
+            
+            enemy.take_damage(damage)
+            logger.log(f"You attack {enemy.name} for {damage} damage!", "combat")
+            
+            if enemy.health <= 0:
+                logger.log(f"You defeated the {enemy.name}!", "combat")
+                break
+                
+            # Enemy Attacks
+            enemy.attack(player)
+            logger.log(f"{enemy.name} attacks you!", "combat")
+            
+        if not player.is_alive:
+            logger.log("You were slain...", "combat")
+
