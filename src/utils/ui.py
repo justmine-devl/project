@@ -1,35 +1,36 @@
-import os
+from utils.logger import logger
 
 class UI:
     @staticmethod
     def clear_screen():
         """Clears the terminal screen for a cleaner UI."""
+        import os
         os.system('cls' if os.name == 'nt' else 'clear')
 
     @staticmethod
     def header(title):
-        print("\n" + "="*50)
-        print(f" {title.center(48)} ")
-        print("="*50)
+        logger.log(f"=== {title} ===", "info")
 
     @staticmethod
     def info(message):
-        print(f"[*] {message}")
+        logger.log(message, "info")
 
     @staticmethod
     def warning(message):
-        print(f"[!] {message}")
+        logger.log(message, "warning")
 
     @staticmethod
     def alert(message):
-        print(f"*** {message} ***")
+        logger.log(message, "alert")
 
     @staticmethod
     def hud(time_sys, weather, biome, player, inventory, base, skills, quests):
-        print("\n" + "-"*50)
-        print(f" {time_sys} | {weather}")
-        print(f" Biome: {biome}")
-        print(f" {player}")
-        print(f" {inventory}")
-        print(f" {base}")
-        print("-"*50)
+        # For TUI, we still print the HUD. For GUI, the GUI will handle this.
+        hud_text = (
+            f"\n{time_sys} | {weather}\n"
+            f" Biome: {biome}\n"
+            f" {player}\n"
+            f" {inventory}\n"
+            f" {base}"
+        )
+        print(hud_text)

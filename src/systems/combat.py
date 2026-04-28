@@ -86,3 +86,36 @@ class CombatSystem:
                 print("[!] Invalid choice.")
         
         return "won" if enemy.health <= 0 else "lost"
+
+    def resolve_combat_gui(self, player, enemy, inventory):
+        """
+        Non-blocking GUI version of combat.
+        In a full GUI, this would be a separate window. For this prototype,
+        we'll simulate the turns and log them to the logger.
+        """
+        from utils.logger import logger
+        logger.log(f"COMBAT: {player.name} vs {enemy.name}!", "combat")
+        
+        # Simulate 3 turns of battle
+        for i in range(3):
+            if enemy.health <= 0 or not player.is_alive: break
+            
+            # Player Attacks
+            damage = 10
+            if inventory.has_item("Basic Axe"): damage = 20
+            elif inventory.has_item("Advanced Axe"): damage = 35
+            
+            enemy.take_damage(damage)
+            logger.log(f"You attack {enemy.name} for {damage} damage!", "combat")
+            
+            if enemy.health <= 0:
+                logger.log(f"You defeated the {enemy.name}!", "combat")
+                break
+                
+            # Enemy Attacks
+            enemy.attack(player)
+            logger.log(f"{enemy.name} attacks you!", "combat")
+            
+        if not player.is_alive:
+            logger.log("You were slain...", "combat")
+
