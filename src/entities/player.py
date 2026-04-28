@@ -8,19 +8,22 @@ class Player:
         self.stamina = 100
         self.is_alive = True
 
-    def update_stats(self, current_temp=20):
+    def update_stats(self, current_temp=20, is_sheltered=False):
         """Simulate time passing: decrease hunger and thirst, and check temperature."""
         self.hunger -= 1
         self.thirst -= 2
         
         # Temperature impact
-        if current_temp < 5:
-            self.health -= 2
-            print("[!] You are freezing! Health is dropping!")
-        elif current_temp > 35:
-            self.health -= 2
-            self.thirst -= 2
-            print("[!] It's too hot! You are dehydrating and losing health!")
+        if not is_sheltered:
+            if current_temp < 5:
+                self.health -= 2
+                print("[!] You are freezing! Health is dropping!")
+            elif current_temp > 35:
+                self.health -= 2
+                self.thirst -= 2
+                print("[!] It's too hot! You are dehydrating and losing health!")
+        else:
+            print("[*] Your shelter protects you from the harsh weather.")
         
         if self.hunger <= 0 or self.thirst <= 0:
             self.health -= 5

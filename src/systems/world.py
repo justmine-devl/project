@@ -17,7 +17,7 @@ class World:
             "Water": Resource("Water", rarity=0.4)
         }
 
-    def gather_resource(self, player):
+    def gather_resource(self, player, biome=None):
         """
         Attempts to gather a random resource based on rarity.
         Costs stamina.
@@ -25,10 +25,22 @@ class World:
         if not player.use_stamina(15):
             return None
 
-        # Simple weighted random choice
-        possible_resources = list(self.resources.keys())
-        weights = [r.rarity for r in self.resources.values()]
+        # Base resources and their default weights
+        base_resources = {
+            "Wood": 0.8,
+            "Stone": 0.5,
+            "Berry": 0.6,
+            "Water": 0.4
+        }
         
+        # Apply biome modifiers if present
+        weights = []
+        possible_resources = []
+        for res, weight in base_resources.items():
+            mod = biome.resource_modifiers.get(res, 1.0) if biome else 1.0
+            weights.append(weight * mod)
+            possible_resources.append(res)
+
         gathered = random.choices(possible_resources, weights=weights, k=1)[0]
         print(f"[*] You spent some effort and found: {gathered}!")
         return gathered

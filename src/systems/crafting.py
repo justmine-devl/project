@@ -5,7 +5,10 @@ class CraftingSystem:
             "Basic Axe": {"Wood": 3, "Stone": 2},
             "Stone Pickaxe": {"Wood": 2, "Stone": 3},
             "Campfire": {"Wood": 5, "Stone": 1},
-            "Simple Shelter": {"Wood": 10, "Cloth": 2}
+            "Simple Shelter": {"Wood": 10, "Cloth": 2},
+            "Advanced Axe": {"Metal": 5, "Wood": 3},
+            "Reinforced Wall": {"Metal": 10, "Stone": 10},
+            "Medicine": {"Berry": 5, "Cloth": 1}
         }
 
     def get_available_recipes(self, inventory):
