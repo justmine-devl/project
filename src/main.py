@@ -12,13 +12,16 @@ from systems.base import Base
 from systems.skills import SkillSystem
 from systems.quests import QuestSystem
 from systems.lore import LoreSystem
+from utils.ui import UI
 import random
 
 def main():
-    print("=== Welcome to the Untitled Survival Project: Phase 4 Progression ===")
+    UI.clear_screen()
+    UI.header("UNTITLED SURVIVAL PROJECT")
+    print("Welcome to the final prototype build!")
     
     # Initialization
-    player_name = input("Enter your survivor's name: ")
+    player_name = input("\nEnter your survivor's name: ")
     player = Player(player_name)
     world = World()
     inventory = Inventory()
@@ -35,29 +38,22 @@ def main():
     quests = QuestSystem()
     lore = LoreSystem()
     
-    # Optional Load (Save/Load would need updating to support new systems)
+    # Optional Load
     load_choice = input("Load previous save? (y/n): ").lower()
     if load_choice == 'y':
-        save_sys.load(player, inventory, time_sys)
+        save_sys.load(player, inventory, time_sys, skills, quests, lore)
 
     while player.is_alive:
-        # Current State
-        print("\n" + "="*40)
-        print(f" {time_sys} | {weather}")
-        print(f"Current Biome: {biome_sys.get_current_biome()}")
-        print(player)
-        print(inventory)
-        print(base_sys)
-        print(skills)
-        print(quests)
-        print("="*40)
+        UI.clear_screen()
+        UI.header(f"Day {time_sys.day} - {player.name}")
+        UI.hud(time_sys, weather, biome_sys.get_current_biome(), player, inventory, base_sys, skills, quests)
         
         print("\nWhat would you like to do?")
         print("1. Gather Resources (4h)")
         print("2. Search for Water (2h)")
         print("3. Explore Area (6h)")
         print("4. Travel to New Region (8h)")
-        print("5. Eat/Drink from Inventory (0h)")
+        print("5. Eat/Drink (0h)")
         print("6. Craft Item (1h)")
         print("7. Manage Base (0h)")
         print("8. Rest (8h)")
@@ -66,7 +62,7 @@ def main():
         print("11. Save Game (0h)")
         print("12. Quit")
         
-        choice = input("> ")
+        choice = input("\n> ")
         
         if choice == "1":
             res = world.gather_resource(player, biome_sys.get_current_biome())
@@ -90,15 +86,14 @@ def main():
             time_sys.advance_time(6)
             poi = explor_sys.find_poi()
             if poi:
-                print(f"[*] You found a Point of Interest: {poi}")
+                UI.info(f"You found a Point of Interest: {poi}")
                 if input("Explore it? (y/n): ").lower() == 'y':
                     explor_sys.explore_poi(poi, inventory)
-                    # Random chance to find lore
                     if random.random() < 0.3:
                         frag_id = random.choice(["frag1", "frag2", "frag3"])
                         lore.add_fragment(frag_id)
             else:
-                print("[*] You explored the area but found nothing special.")
+                UI.info("You explored the area but found nothing special.")
 
         elif choice == "4":
             biome_sys.move_to_random_biome()
@@ -114,12 +109,12 @@ def main():
                 if inventory.remove_item("Water"):
                     player.drink(30)
             else:
-                print("[!] Item not found or not consumable.")
+                UI.warning("Item not found or not consumable.")
 
         elif choice == "6":
             available = crafting.get_available_recipes(inventory, skills)
             if not available:
-                print("[!] You don't have materials or skill levels for any recipes.")
+                UI.warning("You don't have materials or skill levels for any recipes.")
             else:
                 print("Available Recipes:")
                 for i, recipe in enumerate(available, 1):
@@ -131,10 +126,10 @@ def main():
                     if crafting.craft(recipe_name, inventory, skills):
                         time_sys.advance_time(1)
                 except (ValueError, IndexError):
-                    print("[!] Invalid selection.")
+                    UI.warning("Invalid selection.")
 
         elif choice == "7":
-            print("Base Management:")
+            print("\n--- Base Management ---")
             print("1. Build/Repair Shelter")
             print("2. Upgrade Fortification")
             print("3. Store Item")
@@ -157,13 +152,14 @@ def main():
         elif choice == "8":
             player.recover_stamina(60)
             time_sys.advance_time(8)
-            print("[*] You slept and recovered most of your stamina.")
+            UI.info("You slept and recovered most of your stamina.")
 
         elif choice == "9":
             lore.read_lore()
+            input("\nPress Enter to return...")
 
         elif choice == "10":
-            print("Available Quests:")
+            print("\nAvailable Quests:")
             for i, q in enumerate(quests.available_quests, 1):
                 print(f"{i}. {q.title}: {q.description}")
             q_choice = input("Choose quest number: ")
@@ -171,16 +167,16 @@ def main():
                 q_id = quests.available_quests[int(q_choice)-1].id
                 quests.start_quest(q_id)
             except (ValueError, IndexError):
-                print("[!] Invalid selection.")
+                UI.warning("Invalid selection.")
 
         elif choice == "11":
-            save_sys.save(player, inventory, time_sys)
+            save_sys.save(player, inventory, time_sys, skills, quests, lore)
 
         elif choice == "12":
             print("Exiting game...")
             break
         else:
-            print("[!] Invalid choice.")
+            UI.warning("Invalid choice.")
 
         # End of Turn Updates
         weather.update()
@@ -209,13 +205,16 @@ from systems.base import Base
 from systems.skills import SkillSystem
 from systems.quests import QuestSystem
 from systems.lore import LoreSystem
+from utils.ui import UI
 import random
 
 def main():
-    print("=== Welcome to the Untitled Survival Project: Phase 4 Progression ===")
+    UI.clear_screen()
+    UI.header("UNTITLED SURVIVAL PROJECT")
+    print("Welcome to the final prototype build!")
     
     # Initialization
-    player_name = input("Enter your survivor's name: ")
+    player_name = input("\nEnter your survivor's name: ")
     player = Player(player_name)
     world = World()
     inventory = Inventory()
@@ -232,29 +231,22 @@ def main():
     quests = QuestSystem()
     lore = LoreSystem()
     
-    # Optional Load (Save/Load would need updating to support new systems)
+    # Optional Load
     load_choice = input("Load previous save? (y/n): ").lower()
     if load_choice == 'y':
-        save_sys.load(player, inventory, time_sys)
+        save_sys.load(player, inventory, time_sys, skills, quests, lore)
 
     while player.is_alive:
-        # Current State
-        print("\n" + "="*40)
-        print(f" {time_sys} | {weather}")
-        print(f"Current Biome: {biome_sys.get_current_biome()}")
-        print(player)
-        print(inventory)
-        print(base_sys)
-        print(skills)
-        print(quests)
-        print("="*40)
+        UI.clear_screen()
+        UI.header(f"Day {time_sys.day} - {player.name}")
+        UI.hud(time_sys, weather, biome_sys.get_current_biome(), player, inventory, base_sys, skills, quests)
         
         print("\nWhat would you like to do?")
         print("1. Gather Resources (4h)")
         print("2. Search for Water (2h)")
         print("3. Explore Area (6h)")
         print("4. Travel to New Region (8h)")
-        print("5. Eat/Drink from Inventory (0h)")
+        print("5. Eat/Drink (0h)")
         print("6. Craft Item (1h)")
         print("7. Manage Base (0h)")
         print("8. Rest (8h)")
@@ -263,7 +255,7 @@ def main():
         print("11. Save Game (0h)")
         print("12. Quit")
         
-        choice = input("> ")
+        choice = input("\n> ")
         
         if choice == "1":
             res = world.gather_resource(player, biome_sys.get_current_biome())
@@ -287,15 +279,14 @@ def main():
             time_sys.advance_time(6)
             poi = explor_sys.find_poi()
             if poi:
-                print(f"[*] You found a Point of Interest: {poi}")
+                UI.info(f"You found a Point of Interest: {poi}")
                 if input("Explore it? (y/n): ").lower() == 'y':
                     explor_sys.explore_poi(poi, inventory)
-                    # Random chance to find lore
                     if random.random() < 0.3:
                         frag_id = random.choice(["frag1", "frag2", "frag3"])
                         lore.add_fragment(frag_id)
             else:
-                print("[*] You explored the area but found nothing special.")
+                UI.info("You explored the area but found nothing special.")
 
         elif choice == "4":
             biome_sys.move_to_random_biome()
@@ -311,12 +302,12 @@ def main():
                 if inventory.remove_item("Water"):
                     player.drink(30)
             else:
-                print("[!] Item not found or not consumable.")
+                UI.warning("Item not found or not consumable.")
 
         elif choice == "6":
             available = crafting.get_available_recipes(inventory, skills)
             if not available:
-                print("[!] You don't have materials or skill levels for any recipes.")
+                UI.warning("You don't have materials or skill levels for any recipes.")
             else:
                 print("Available Recipes:")
                 for i, recipe in enumerate(available, 1):
@@ -328,10 +319,10 @@ def main():
                     if crafting.craft(recipe_name, inventory, skills):
                         time_sys.advance_time(1)
                 except (ValueError, IndexError):
-                    print("[!] Invalid selection.")
+                    UI.warning("Invalid selection.")
 
         elif choice == "7":
-            print("Base Management:")
+            print("\n--- Base Management ---")
             print("1. Build/Repair Shelter")
             print("2. Upgrade Fortification")
             print("3. Store Item")
@@ -354,13 +345,14 @@ def main():
         elif choice == "8":
             player.recover_stamina(60)
             time_sys.advance_time(8)
-            print("[*] You slept and recovered most of your stamina.")
+            UI.info("You slept and recovered most of your stamina.")
 
         elif choice == "9":
             lore.read_lore()
+            input("\nPress Enter to return...")
 
         elif choice == "10":
-            print("Available Quests:")
+            print("\nAvailable Quests:")
             for i, q in enumerate(quests.available_quests, 1):
                 print(f"{i}. {q.title}: {q.description}")
             q_choice = input("Choose quest number: ")
@@ -368,16 +360,16 @@ def main():
                 q_id = quests.available_quests[int(q_choice)-1].id
                 quests.start_quest(q_id)
             except (ValueError, IndexError):
-                print("[!] Invalid selection.")
+                UI.warning("Invalid selection.")
 
         elif choice == "11":
-            save_sys.save(player, inventory, time_sys)
+            save_sys.save(player, inventory, time_sys, skills, quests, lore)
 
         elif choice == "12":
             print("Exiting game...")
             break
         else:
-            print("[!] Invalid choice.")
+            UI.warning("Invalid choice.")
 
         # End of Turn Updates
         weather.update()

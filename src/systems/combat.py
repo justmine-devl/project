@@ -4,6 +4,7 @@ class Enemy:
     def __init__(self, name, health, attack_power):
         self.name = name
         self.health = health
+        self.max_health = health
         self.attack_power = attack_power
 
     def take_damage(self, amount):
@@ -11,6 +12,11 @@ class Enemy:
         return self.health <= 0
 
     def attack(self, player):
+        # Small chance for enemy to miss
+        if random.random() < 0.1:
+            print(f"[*] {self.name} missed their attack!")
+            return
+            
         damage = self.attack_power
         player.health -= damage
         print(f"[!] {self.name} attacked you for {damage} damage!")
@@ -45,12 +51,21 @@ class CombatSystem:
                 if inventory.has_item("Basic Axe"):
                     damage = 20
                     print("[*] You attack with your Basic Axe!")
+                elif inventory.has_item("Advanced Axe"):
+                    damage = 35
+                    print("[*] You attack with your Advanced Axe!")
                 else:
                     print("[*] You attack with your bare hands!")
                 
                 if enemy.take_damage(damage):
                     print(f"[*] You defeated the {enemy.name}!")
                     break
+                
+                # Enemy AI: Chance to retreat if low health
+                if enemy.health < enemy.max_health * 0.2:
+                    if random.random() < 0.3:
+                        print(f"[*] The {enemy.name} is terrified and flees!")
+                        return "fled"
                 
                 # Enemy attacks back
                 enemy.attack(player)
